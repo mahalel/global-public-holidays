@@ -3,7 +3,7 @@
 
   # Flake inputs
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable"; # also valid: "nixpkgs"
+    nixpkgs.url = "github:NixOS/nixpkgs/2c7f3c0fb7c08a0814627611d9d7d45ab6d75335"; # also valid: "nixpkgs"
   };
 
   # Flake outputs
@@ -23,6 +23,12 @@
       });
     in
     {
+      packages = forAllSystems({ pkgs }: {
+        dockerImage = pkgs.dockerTools.buildImage {
+          name = "global-public-holidays";
+          config = { Cmd = [ "python main.py"]; };
+        };
+      });
       # Development environment output
       devShells = forAllSystems ({ pkgs }: {
         default =
@@ -40,6 +46,7 @@
               pkgs.python311Packages.openai
               pkgs.python311Packages.dash
               pkgs.python311
+              pkgs.devbox
             ];
           };
       });

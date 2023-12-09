@@ -50,7 +50,11 @@ def main():
         holiday_name = i['name']
         date = i['date']
         country_long, lat, long = get_lat_long(country)
-        description = check_openai(holiday_name, country_long)
+        if openai.organization == openai.api_key:
+            logging.warning("Ensure to set your OpenAI API Key in order to retrieve extra information about each holiday.")
+            description = ""
+        else:
+            description = check_openai(holiday_name, country_long)
         logging.info(f"Successfully retrieved information about {holiday_name} from {country_long}")
         description = textwrap.fill(description, 40).replace("\n", "<br>")
         cs.append(country_long)

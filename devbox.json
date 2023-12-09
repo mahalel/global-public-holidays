@@ -1,0 +1,13 @@
+{
+  "packages": [
+    "github.com/mahalel/global-public-holidays#dockerImage",
+  ],
+  "shell": {
+    "init_hook": null,
+    "scripts": {
+    }
+  },
+  "nixpkgs": {
+    "commit": "2c7f3c0fb7c08a0814627611d9d7d45ab6d75335"
+  }
+}
