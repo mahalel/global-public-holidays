@@ -1,6 +1,6 @@
 {
   "packages": [
-    "github.com/mahalel/global-public-holidays#dockerImage",
+    "github:mahalel/global-public-holidays#dockerImage",
   ],
   "shell": {
     "init_hook": null,

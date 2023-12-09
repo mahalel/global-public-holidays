@@ -26,7 +26,7 @@
       packages = forAllSystems({ pkgs }: {
         dockerImage = pkgs.dockerTools.buildImage {
           name = "global-public-holidays";
-          config = { Cmd = [ "python main.py"]; };
+          config = { Cmd = ["python main.py"]; };
         };
       });
       # Development environment output
