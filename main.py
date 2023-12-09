@@ -1,167 +1,78 @@
-import requests
-import plotly.express as px
-import plotly.graph_objects as go
-import pandas as pd
-import pysnooper
-import json
+from dash import Dash, dcc, html
 from geopy.geocoders import Nominatim
+import json
+import openai
+import os
+import pandas as pd
+import plotly.graph_objects as go
+import pysnooper
+import requests
+import textwrap
+import logging
 
-countries = {
-"AD":"Andorra",
-"AL":"Albania",
-"AR":"Argentina",
-"AT":"Austria",
-"AU":"Australia",
-"AX":"Åland Islands",
-"BA":"Bosnia and Herzegovina",
-"BB":"Barbados",
-"BE":"Belgium",
-"BG":"Bulgaria",
-"BJ":"Benin",
-"BO":"Bolivia",
-"BR":"Brazil",
-"BS":"Bahamas",
-"BW":"Botswana",
-"BY":"Belarus",
-"BZ":"Belize",
-"CA":"Canada",
-"CH":"Switzerland",
-"CL":"Chile",
-"CN":"China",
-"CO":"Colombia",
-"CR":"Costa Rica",
-"CU":"Cuba",
-"CY":"Cyprus",
-"CZ":"Czechia",
-"DE":"Germany",
-"DK":"Denmark",
-"DO":"Dominican Republic",
-"EC":"Ecuador",
-"EE":"Estonia",
-"EG":"Egypt",
-"ES":"Spain",
-"FI":"Finland",
-"FO":"Faroe Islands",
-"FR":"France",
-"GA":"Gabon",
-"GB":"United Kingdom",
-"GD":"Grenada",
-"GG":"Guernsey",
-"GI":"Gibraltar",
-"GL":"Greenland",
-"GM":"Gambia",
-"GR":"Greece",
-"GT":"Guatemala",
-"GY":"Guyana",
-"HN":"Honduras",
-"HR":"Croatia",
-"HT":"Haiti",
-"HU":"Hungary",
-"ID":"Indonesia",
-"IE":"Ireland",
-"IM":"Isle of Man",
-"IS":"Iceland",
-"IT":"Italy",
-"JE":"Jersey",
-"JM":"Jamaica",
-"JP":"Japan",
-"KR":"South Korea",
-"LI":"Liechtenstein",
-"LS":"Lesotho",
-"LT":"Lithuania",
-"LU":"Luxembourg",
-"LV":"Latvia",
-"MA":"Morocco",
-"MC":"Monaco",
-"MD":"Moldova",
-"ME":"Montenegro",
-"MG":"Madagascar",
-"MK":"North Macedonia",
-"MN":"Mongolia",
-"MS":"Montserrat",
-"MT":"Malta",
-"MX":"Mexico",
-"MZ":"Mozambique",
-"NA":"Namibia",
-"NE":"Niger",
-"NG":"Nigeria",
-"NI":"Nicaragua",
-"NL":"Netherlands",
-"NO":"Norway",
-"NZ":"New Zealand",
-"PA":"Panama",
-"PE":"Peru",
-"PG":"Papua New Guinea",
-"PL":"Poland",
-"PR":"Puerto Rico",
-"PT":"Portugal",
-"PY":"Paraguay",
-"RO":"Romania",
-"RS":"Serbia",
-"RU":"Russia",
-"SE":"Sweden",
-"SG":"Singapore",
-"SI":"Slovenia",
-"SJ":"Svalbard and Jan Mayen",
-"SK":"Slovakia",
-"SM":"San Marino",
-"SR":"Suriname",
-"SV":"El Salvador",
-"TN":"Tunisia",
-"TR":"Turkey",
-"UA":"Ukraine",
-"US":"United States",
-"UY":"Uruguay",
-"VA":"Vatican City",
-"VE":"Venezuela",
-"VN":"Vietnam",
-"ZA":"South Africa",
-"ZW":"Zimbabwe",
-}
+logging.basicConfig(level=logging.INFO)
 
+with open('countries.json') as json_file:
+   json_data = json.load(json_file)
+
+openai.organization = os.getenv("OPENAI_ORG")
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+# @pysnooper.snoop()
+def check_openai(holiday, country):
+    logging.info(f"Getting information about the {holiday} from {country}")
+    completion = openai.ChatCompletion.create(
+       model="gpt-3.5-turbo",
+       messages=[
+            {"role": "system", "content": "You are an information guide on various countries public holidays. DO NOT OUTPUT THE DATE. I am interested in purely information about the holiday and it's significance. Your output should not be longer than 2 sentences. DO NOT OUTPUT THE DATE."},
+            {"role": "user", "content": f"I want information about the {holiday} holiday from {country}, please do not output the date of the holiday."}
+       ])
+    result = completion.choices[0].message.content
+    return result
+
+# @pysnooper.snoop()
 def get_public_holidays():
+    logging.info(f"Retrieving list of public holidays from Nager.Date")
     return requests.get("https://date.nager.at/api/v3/NextPublicHolidaysWorldwide").json()
 
 # @pysnooper.snoop()
 def get_lat_long(country):
-    geolocator = Nominatim(user_agent="testing-andrei")
-    location = geolocator.geocode(country)
-    return location.latitude, location.longitude
+    element = next((item for item in json_data if item["CountryCode"] == country), None)
+    return element["CountryName"], element["CapitalLatitude"], element["CapitalLongitude"]
 
-
-
-
-@pysnooper.snoop()
+# @pysnooper.snoop()
 def main():
-    cs = []
-    latx = []
-    longx = []
-    name = []
+    cs, latx, longx, name, desc = [], [], [], [], []
     holidays = get_public_holidays()
-    for i in holidays[0:2]:
-        country = countries[i['countryCode']]
+    logging.info(f"Retrieved {len(holidays)} results")
+    for i in holidays:
+        country = i['countryCode']
         holiday_name = i['name']
-        lat, long = get_lat_long(country)
-        cs.append(country)
+        date = i['date']
+        country_long, lat, long = get_lat_long(country)
+        description = check_openai(holiday_name, country_long)
+        logging.info(f"Successfully retrieved information about {holiday_name} from {country_long}")
+        description = textwrap.fill(description, 40).replace("\n", "<br>")
+        cs.append(country_long)
         name.append(holiday_name)
         latx.append(lat)
         longx.append(long)
+        desc.append(description)
 
     df = pd.DataFrame(
        {
            "cnt": cs,
+           "date": date,
            "lat": latx,
            "long": longx,
-           "holiday": name
-           # "Custom": ["test1", "test2"]
+           "holiday": name,
+           "desc": desc
        }
     )
 
-    df['text'] = df['cnt'] + " " + df['holiday']
-    # fig = px.scatter_geo(df, lat='Latitude', lon='Longitude', hover_name='Country', color="Country", text="Country", symbol="Holiday", custom_data="Custom", projection="natural earth2")
+    df['text'] = "Date: "+df['date']+"<br>" + "Country: "+df['cnt']+"<br>" + "Holiday: "+df['holiday']+"<br><br>"+df['desc']
     
     fig = go.Figure(data=go.Scattergeo(
-        # locationmode = 'USA-states',
         lon = df['long'],
         lat = df['lat'],
         text = df['text'],
@@ -171,19 +82,36 @@ def main():
             opacity = 0.8,
             reversescale = True,
             autocolorscale = False,
-            symbol = 'square',
+            symbol = "x-open-dot",
             line = dict(
                 width=2,
                 color='rgba(102, 102, 102)'
             ),
-            colorscale = 'Blues',
-            cmin = 0,
             color = "rgba(40, 44, 52)",
-            # cmax = df['cnt'].max(),
-            # colorbar_title="Incoming flights<br>February 2011"
         )))
-    
-    
-    fig.show()
+      
+    fig.update_geos(
+       resolution=110,
+       showcoastlines=True,
+       showcountries=True,
+       showland=True,
+       showocean=False,
+       showlakes=False,
+       showrivers=False
+    )
+    fig.update_layout(
+        height=800, 
+        margin={"r":0,"t":0,"l":0,"b":0},
+        title='<br><br>Public Holidays around the World<br>(Hover for additional information)'
+        )
+
+    app = Dash()
+    app.layout = html.Div([
+        dcc.Graph(figure=fig)
+    ])
+
+    app.run_server(debug=False)
+
+
 
 main()

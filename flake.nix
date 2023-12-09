@@ -31,18 +31,14 @@
           pkgs.mkShell {
             # The Nix packages provided in the environment
             packages = [
-              pkgs.nodePackages.prettier
-              pkgs.ripgrep
-              pkgs.tree
               pkgs.python311Packages.python-lsp-server
               pkgs.python311Packages.plotly
               pkgs.python311Packages.pandas
               pkgs.python311Packages.packaging
               pkgs.python311Packages.pysnooper
               pkgs.python311Packages.geopy
-              # pkgs.python311Packages.matplotlib
-              # pkgs.python311Packages.geopandas
-              # pkgs.python311Packages.folium
+              pkgs.python311Packages.openai
+              pkgs.python311Packages.dash
               pkgs.python311
             ];
           };
