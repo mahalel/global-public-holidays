@@ -2,6 +2,9 @@
 
 The Global Holidays Explorer is a fun project that provides a platform for displaying public holidays from around the world along with detailed information about each holiday.
 
+![example](assets/public_holidays_example.png)
+
+
 
 # Features
 
@@ -11,7 +14,17 @@ The Global Holidays Explorer is a fun project that provides a platform for displ
 
  - User-Friendly Interface: Enjoy a clean and intuitive interface for seamless navigation. The repository is designed with simplicity in mind, I use the plotly library to display a map of the world and pin each holiday on the map.
 
-# Getting Started
+# Prerequisites
+
+In order to retrieve detailed descriptions about each holiday, an OpenAI API key needs to be set as the `OPENAI_API_KEY` environment variable.
+For example:
+```bash
+export OPENAI_API_KEY="YOUR API KEY"
+```
+
+To generate your API key, visit the [OpenAI portal](https://platform.openai.com/api-keys) and _Create a new secret key_
+
+# Install
 
 To get started with the Global Holidays Explorer, follow these steps:
 
@@ -22,21 +35,16 @@ git clone https://github.com/your-username/global-holidays-explorer.git
 cd global-holidays-explorer
 ```
 
-- Install using NIX
+## Docker
+
+
+## [Nix](https://nix.dev/)
+
+A nix flake is supplied within the repo root, to run the program simply:
 
 ```sh
 nix develop
-python main.py
+python app.py
 ```
 
 ![nix develop](./assets/nix_develop.gif)
-
-1. Explore the Codebase: Take a look at the codebase to understand the structure and how the holiday data is organized.
-2. Contribute: If you'd like to contribute to the project, follow the contribution guidelines outlined in the repository. Whether it's adding new holidays, improving documentation, or enhancing features, your contributions are welcome.
-3. Integrate with Your Project: For developers, explore the API documentation to seamlessly integrate global holiday data into your applications.
-
-# Contributions and Feedback
-
-We encourage and appreciate contributions from the community. If you have suggestions, bug reports, or want to add new features, please open an issue or submit a pull request. Your feedback is crucial in making the Global Holidays Explorer a valuable resource for everyone.
-
-Start exploring and celebrating the diverse holidays that our world has to offer with the Global Holidays Explorer!
