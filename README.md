@@ -1,6 +1,16 @@
-# Overview
+# Global Public Holidays
 
-The Global Holidays Explorer is a fun project that provides a platform for displaying public holidays from around the world along with detailed information about each holiday.
+- [Summary](#summary)
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+  - [Docker](#docker)
+  - [Nix](#nix)
+
+
+# Summary
+
+The Global Public Holidays explorer is a fun project that provides a platform for displaying public holidays from around the world along with detailed information about each holiday.
 
 ![example](assets/public_holidays_example.png)
 
@@ -8,11 +18,11 @@ The Global Holidays Explorer is a fun project that provides a platform for displ
 
 # Features
 
- - Worldwide Coverage: Access an extensive database of public holidays from diverse countries using the wonderful (and free) [Nager.AT](https://date.nager.at/) API.
+ - **Worldwide Coverage:** Access an extensive database of public holidays from diverse countries using the wonderful (and free) [Nager.AT](https://date.nager.at/) API.
 
- - Informative Details: Get in-depth information about each holiday, including its origin, significance, traditions, and any associated historical or cultural context. This feature ensures that users gain a deeper understanding of the holidays they are exploring.
+ - **Informative Details:** Get in-depth information about each holiday, including its origin, significance, traditions, and any associated historical or cultural context. This feature ensures that users gain a deeper understanding of the holidays they are exploring.
 
- - User-Friendly Interface: Enjoy a clean and intuitive interface for seamless navigation. The repository is designed with simplicity in mind, I use the plotly library to display a map of the world and pin each holiday on the map.
+ - **User-Friendly Interface:** Enjoy a clean and intuitive interface for seamless navigation. The repository is designed with simplicity in mind, I use the plotly library to display a map of the world and pin each holiday on the map.
 
 # Prerequisites
 
@@ -24,16 +34,9 @@ export OPENAI_API_KEY="YOUR API KEY"
 
 To generate your API key, visit the [OpenAI portal](https://platform.openai.com/api-keys) and _Create a new secret key_
 
-# Install
+# Installation
 
-To get started with the Global Holidays Explorer, follow these steps:
 
-- Clone the Repository: Clone the repository to your local machine using the provided Git commands.
-
-```bash
-git clone https://github.com/your-username/global-holidays-explorer.git
-cd global-holidays-explorer
-```
 
 ## Docker
 
@@ -42,7 +45,7 @@ cd global-holidays-explorer
 docker pull ghcr.io/mahalel/global-public-holidays:latest
 ```
 
-- Run image
+- Run image (Supply the OpenAI api key as an environment var)
 ```bash
 docker run -d \
   --name public-holidays \
@@ -61,9 +64,13 @@ docker stop public-holidays
 
 ## [Nix](https://nix.dev/)
 
-A nix flake is supplied within the repo root, to run the program simply:
+A nix flake is supplied, to run the program simply:
 
-```sh
+- Clone the Repository: Clone the repository to your local machine using the provided Git commands.
+
+```bash
+git clone https://github.com/your-username/global-holidays-explorer.git
+cd global-holidays-explorer
 nix develop
 python app.py
 ```
