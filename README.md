@@ -37,6 +37,27 @@ cd global-holidays-explorer
 
 ## Docker
 
+- Pull image from Github Container Registry
+```bash
+docker pull ghcr.io/mahalel/global-public-holidays:latest
+```
+
+- Run image
+```bash
+docker run -d \
+  --name public-holidays \
+  -p 8050:8050 \
+  -e OPENAI_API_KEY="YOUR API KEY" \
+  ghcr.io/mahalel/global-public-holidays:latest
+```
+
+- Open App by browsing to http://localhost:8050
+
+- Stop the container
+
+```bash
+docker stop public-holidays
+```
 
 ## [Nix](https://nix.dev/)
 
@@ -48,3 +69,5 @@ python app.py
 ```
 
 ![nix develop](./assets/nix_develop.gif)
+
+- Open App by browsing to http://localhost:8050
