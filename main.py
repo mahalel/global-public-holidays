@@ -5,7 +5,6 @@ import openai
 import os
 import pandas as pd
 import plotly.graph_objects as go
-import pysnooper
 import requests
 import textwrap
 import logging
@@ -18,7 +17,6 @@ with open('countries.json') as json_file:
 openai.organization = os.getenv("OPENAI_ORG")
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# @pysnooper.snoop()
 def check_openai(holiday, country):
     logging.info(f"Getting information about the {holiday} from {country}")
     completion = openai.ChatCompletion.create(
@@ -30,18 +28,15 @@ def check_openai(holiday, country):
     result = completion.choices[0].message.content
     return result
 
-# @pysnooper.snoop()
 def get_public_holidays():
     logging.info(f"Retrieving list of public holidays from Nager.Date")
     return requests.get("https://date.nager.at/api/v3/NextPublicHolidaysWorldwide").json()
 
-# @pysnooper.snoop()
 def get_lat_long(country):
     element = next((item for item in json_data if item["CountryCode"] == country), None)
     return element["CountryName"], element["CapitalLatitude"], element["CapitalLongitude"]
 
-# @pysnooper.snoop()
-def main():
+def fig():
     cs, latx, longx, name, desc = [], [], [], [], []
     holidays = get_public_holidays()
     logging.info(f"Retrieved {len(holidays)} results")
@@ -108,14 +103,13 @@ def main():
         margin={"r":0,"t":0,"l":0,"b":0},
         title='<br><br>Public Holidays around the World<br>(Hover for additional information)'
         )
-
-    app = Dash()
-    app.layout = html.Div([
-        dcc.Graph(figure=fig)
-    ])
-
-    app.run_server(debug=False)
+    return fig
 
 
+app = Dash()
+app.layout = html.Div([
+    dcc.Graph(figure=fig())
+])
 
-main()
+if __name__ == '__main__':
+ app.run_server(debug=True, host="0.0.0.0", port=8050, use_reloader=False)

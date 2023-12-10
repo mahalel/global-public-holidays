@@ -1,30 +1,27 @@
-FROM python:3.11-slim AS base
+FROM python:3.11-buster as builder
 
-# Setup env
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONFAULTHANDLER 1
+RUN pip install poetry==1.7.1
 
-# Dependencies
-FROM base AS python-deps
-
-### Install pipenv and compilation dependencies
-RUN pip install pipenv \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends gcc
-
-### Install python dependencies in /.venv
-COPY Pipfile .
-COPY Pipfile.lock .
-RUN PIPENV_VENV_IN_PROJECT=1 pipenv install --deploy
-
-# Runtime
-FROM gcr.io/distroless/python3
-# FROM python:3.11-slim
+ENV POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_IN_PROJECT=1 \
+    POETRY_VIRTUALENVS_CREATE=1 \
+    POETRY_CACHE_DIR=/tmp/poetry_cache
 
 WORKDIR /app
-COPY --from=python-deps /.venv/lib/python3.11/site-packages /app/site-packages
-ENV PYTHONPATH /app/site-packages
-COPY . .
 
-EXPOSE 8050
-ENTRYPOINT ["python", "main.py"]
+COPY pyproject.toml poetry.lock ./
+# RUN touch README.md
+
+RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --no-root
+
+FROM python:3.11-slim-buster as runtime
+
+ENV VIRTUAL_ENV=/app/.venv \
+    PATH="/app/.venv/bin:$PATH"
+
+COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+
+COPY countries.json main.py /app
+
+# ENTRYPOINT ["python", "main.py"]
+CMD gunicorn -b 0.0.0.0:80 app:server
