@@ -39,6 +39,7 @@
               pkgs.python311Packages.geopy
               pkgs.python311Packages.openai
               pkgs.python311Packages.dash
+              pkgs.python311Packages.flask
               pkgs.python311
               pkgs.devbox
             ];

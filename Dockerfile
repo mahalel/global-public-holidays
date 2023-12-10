@@ -16,12 +16,13 @@ RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --no-root
 
 FROM python:3.11-slim-buster as runtime
 
+WORKDIR /app
+
 ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH"
 
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
-COPY countries.json main.py /app
+COPY countries.json app.py ./
 
-# ENTRYPOINT ["python", "main.py"]
-CMD gunicorn -b 0.0.0.0:80 app:server
+CMD gunicorn app:flask_app -b 0.0.0.0:8050 --workers 1

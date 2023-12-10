@@ -1,31 +1,32 @@
 from dash import Dash, dcc, html
 from geopy.geocoders import Nominatim
 import json
-import openai
+from openai import OpenAI
 import os
 import pandas as pd
 import plotly.graph_objects as go
 import requests
 import textwrap
 import logging
+from flask import Flask
 
 logging.basicConfig(level=logging.INFO)
 
 with open('countries.json') as json_file:
    json_data = json.load(json_file)
 
-openai.organization = os.getenv("OPENAI_ORG")
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# openai.organization = os.getenv("OPENAI_ORG")
 
-def check_openai(holiday, country):
+def check_openai(holiday, country, api_key):
     logging.info(f"Getting information about the {holiday} from {country}")
-    completion = openai.ChatCompletion.create(
+    client = OpenAI(api_key=api_key)
+    chat_completion = client.chat.completions.create(
        model="gpt-3.5-turbo",
        messages=[
             {"role": "system", "content": "You are an information guide on various countries public holidays. DO NOT OUTPUT THE DATE. I am interested in purely information about the holiday and it's significance. Your output should not be longer than 2 sentences. DO NOT OUTPUT THE DATE."},
             {"role": "user", "content": f"I want information about the {holiday} holiday from {country}, please do not output the date of the holiday."}
        ])
-    result = completion.choices[0].message.content
+    result = chat_completion.choices[0].message.content
     return result
 
 def get_public_holidays():
@@ -39,17 +40,18 @@ def get_lat_long(country):
 def fig():
     cs, latx, longx, name, desc = [], [], [], [], []
     holidays = get_public_holidays()
+    api_key = os.getenv("OPENAI_API_KEY")
     logging.info(f"Retrieved {len(holidays)} results")
     for i in holidays:
         country = i['countryCode']
         holiday_name = i['name']
         date = i['date']
         country_long, lat, long = get_lat_long(country)
-        if openai.organization == openai.api_key:
+        if api_key is None:
             logging.warning("Ensure to set your OpenAI API Key in order to retrieve extra information about each holiday.")
             description = ""
         else:
-            description = check_openai(holiday_name, country_long)
+            description = check_openai(holiday_name, country_long, api_key)
         logging.info(f"Successfully retrieved information about {holiday_name} from {country_long}")
         description = textwrap.fill(description, 40).replace("\n", "<br>")
         cs.append(country_long)
@@ -105,11 +107,13 @@ def fig():
         )
     return fig
 
+flask_app = Flask(__name__)
 
-app = Dash()
-app.layout = html.Div([
+dash_app = Dash(server=flask_app)
+dash_app.layout = html.Div([
     dcc.Graph(figure=fig())
 ])
 
 if __name__ == '__main__':
- app.run_server(debug=True, host="0.0.0.0", port=8050, use_reloader=False)
+ # dash_app.run_server(debug=True, host="0.0.0.0", port=8050, use_reloader=False)
+ dash_app.run_server(debug=False)
