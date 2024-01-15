@@ -10,7 +10,6 @@ ENV POETRY_NO_INTERACTION=1 \
 WORKDIR /app
 
 COPY pyproject.toml poetry.lock ./
-# RUN touch README.md
 
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --no-root
 
@@ -23,6 +22,6 @@ ENV VIRTUAL_ENV=/app/.venv \
 
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
-COPY countries.json app.py ./
+COPY src/ ./
 
 CMD gunicorn app:flask_app -b 0.0.0.0:8050 --workers 1
