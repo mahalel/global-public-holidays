@@ -62,6 +62,12 @@ docker run -d \
 docker stop public-holidays
 ```
 
+- Remove the container
+
+```bash
+docker rm public-holidays
+```
+
 ## [Nix](https://nix.dev/)
 
 A nix flake is supplied, to run the program simply:
@@ -72,7 +78,7 @@ A nix flake is supplied, to run the program simply:
 git clone https://github.com/your-username/global-holidays-explorer.git
 cd global-holidays-explorer
 nix develop
-python app.py
+cd src && python app.py
 ```
 
 ![nix develop](./assets/nix_develop.gif)
