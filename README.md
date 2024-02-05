@@ -84,3 +84,7 @@ cd src && python app.py
 ![nix develop](./assets/nix_develop.gif)
 
 - Open App by browsing to http://localhost:8050
+
+## Contributing
+
+TODO
