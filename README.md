@@ -6,6 +6,7 @@
 - [Installation](#installation)
   - [Docker](#docker)
   - [Nix](#nix)
+- [Contributing](#contributing)
 
 
 # Summary
@@ -85,6 +86,7 @@ cd src && python app.py
 
 - Open App by browsing to http://localhost:8050
 
-## Contributing
+
+# Contributing
 
 TODO
